@@ -2493,8 +2493,7 @@ true
 
 #[inline]
 pub fn is_disable_installation() -> bool {
-//    is_some_hard_opton("disable-installation")
-true
+    is_some_hard_opton("disable-installation")
 }
 
 // This function must be kept the same as the one in flutter and sciter code.
