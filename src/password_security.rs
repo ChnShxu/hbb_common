@@ -20,7 +20,15 @@ pub enum ApproveMode {
     Click,
 }
 
+
 fn get_auto_password() -> String {
+    // 检查是否有用户自定义的临时密码
+    let custom_temp_password = Config::get_option("custom-temporary-password");
+    if !custom_temp_password.is_empty() {
+        return custom_temp_password;
+    }
+    
+    // 如果没有自定义密码，则生成随机密码
     let len = temporary_password_length();
     if Config::get_bool_option(crate::config::keys::OPTION_ALLOW_NUMERNIC_ONE_TIME_PASSWORD) {
         Config::get_auto_numeric_password(len)
@@ -37,6 +45,20 @@ pub fn update_temporary_password() {
 // Should only be called in server
 pub fn temporary_password() -> String {
     TEMPORARY_PASSWORD.read().unwrap().clone()
+}
+
+// Set custom temporary password
+pub fn set_custom_temporary_password(password: &str) {
+    Config::set_option("custom-temporary-password".to_owned(), password.to_owned());
+    // 更新当前内存中的临时密码
+    *TEMPORARY_PASSWORD.write().unwrap() = get_auto_password();
+}
+
+// Clear custom temporary password (revert to auto-generated)
+pub fn clear_custom_temporary_password() {
+    Config::set_option("custom-temporary-password".to_owned(), "".to_owned());
+    // 更新当前内存中的临时密码为随机生成的
+    *TEMPORARY_PASSWORD.write().unwrap() = get_auto_password();
 }
 
 fn verification_method() -> VerificationMethod {
